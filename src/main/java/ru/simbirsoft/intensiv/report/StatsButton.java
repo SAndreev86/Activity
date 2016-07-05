@@ -13,7 +13,13 @@ import java.awt.event.WindowListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -63,41 +69,33 @@ public class StatsButton implements ActionListener {
 		jPanelL.add(detailedStatL);
 		jPanelL.add(qScrollerL);
 		
+									
+		List<DataStatisticDB> acty = WorkWithDB.getStatistic(name, new Date());
 		
-		List<DataStatisticDB> stat = WorkWithDB.getStatistic(name, new Date());
+		LinkedHashMap<String,DataStatisticDB> actySet = new LinkedHashMap<String,DataStatisticDB>();
 		
 		
-		
-						
-		List<DataStatisticDB> acty = new ArrayList<DataStatisticDB>();
-		
-		for(DataStatisticDB a : stat) {
-			
-			DataStatisticDB temp = new DataStatisticDB();
-			temp.setActivity(a.getActivity());
-			temp.setTime(a.getTime());
-			
-			acty.add(temp);
-		}
-		
-		for(int n = 0; n < acty.size(); n++) {
-			for(int t = 0; t < acty.size(); t++) {
+		for(DataStatisticDB s : acty) {
+			if(actySet.containsKey(s.getName())) {
 				
-				if(acty.get(n).getActivity().equals((acty.get(t).getActivity())) && n != t) {
-					acty.get(n).setTime(acty.get(n).getTime() + acty.get(t).getTime());
-					acty.remove(t);
-					
-				}
+				DataStatisticDB tempDB = actySet.get(s.getName());
+				tempDB.setTime(tempDB.getTime()+s.getTime());
+				actySet.put(s.getName(), tempDB);
+				
+			} else {
+				
+				actySet.put(s.getName(), s);
 				
 			}
 		}
-		
 		incomingL.append("Краткий отчет за: "+new SimpleDateFormat("dd.MM.yyyy").format(new Date())+"\n");
 		incomingL.append(" \n");
+			
+		for (Entry<String, DataStatisticDB> entry : actySet.entrySet()) {
+	    	incomingL.append("Время, затраченное на "+entry.getValue().getActivity()+", составляет: "+TimeConverter.convert(entry.getValue().getTime())+"\n");
+	    }
 		
-		for(DataStatisticDB s : acty) {
-			incomingL.append("Время, затраченное на "+s.getActivity()+", составляет: "+TimeConverter.convert(s.getTime())+"\n");
-		}
+		
 		detailedStatL.addActionListener(new ActionListener() {
 
 			@Override
@@ -127,7 +125,10 @@ public class StatsButton implements ActionListener {
 				incomingD.append("Подробный отчет за: "+new SimpleDateFormat("dd.MM.yyyy").format(new Date())+"\n");
 				incomingD.append(" \n");
 				
-				for(DataStatisticDB actD : stat) {
+				List<DataStatisticDB> acty = WorkWithDB.getStatistic(name, new Date());
+
+				
+				for(DataStatisticDB actD : acty) {
 					
 					incomingD.append("Время, затраченное на "+actD.getActivity()+", составляет: "+TimeConverter.convert(actD.getTime())+"\n");
 					
