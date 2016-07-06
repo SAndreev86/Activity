@@ -5,8 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.*;
-
-
 import ru.simbirsoft.intensiv.report.ReportHistoryButton;
 import ru.simbirsoft.intensiv.report.StatsButton;
 import ru.simbirsoft.intensiv.workWithDB.WorkWithDB;
@@ -25,6 +23,7 @@ public class RunNewTab extends Thread {
 	static JTextArea comment;
 	JComboBox<String> comboBox;
 	JButton stopButton;
+	JButton addItemButton;
 
 	public static Password customListener;
 
@@ -39,11 +38,11 @@ public class RunNewTab extends Thread {
 				}
 
 				currentTime = System.currentTimeMillis();
-				timerTime = (currentTime - startTime) / 1000;
+				timerTime = timerTime + 1;
 
 				// запуск метода обновления/отображения окна таймера
 				timerField.setText(TimeConverter.convert(timerTime));
-				System.out.println(TimeConverter.convert(timerTime) + "  " + timerTime);
+				System.out.println(TimeConverter.convert(timerTime) + " " + timerTime);
 			}
 		}
 
@@ -53,9 +52,9 @@ public class RunNewTab extends Thread {
 		this.tabName = tabName;
 	}
 
+	// метод по созданию new Tab
 	public void run() {
 
-		// запускается метод по созданию newWindow
 		JPanel panel1 = new JPanel();
 		panel1.setLayout(null);
 
@@ -67,9 +66,11 @@ public class RunNewTab extends Thread {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				RunWindow.tabIsStarted.put(panel1.getName(), true);
 				startButton.setEnabled(false);
 				stopButton.setEnabled(true);
 				comboBox.setEnabled(false);
+				addItemButton.setEnabled(false);
 
 				startTime = System.currentTimeMillis();
 				selectedItem = (String) comboBox.getSelectedItem();
@@ -88,12 +89,12 @@ public class RunNewTab extends Thread {
 								}
 
 								currentTime = System.currentTimeMillis();
-								timerTime = (currentTime - startTime) / 1000;
+								timerTime = timerTime + 1;
 
 								// запуск метода обновления/отображения окна
 								// таймера
 								timerField.setText(TimeConverter.convert(timerTime));
-								System.out.println(TimeConverter.convert(timerTime) + "  " + timerTime);
+								System.out.println(TimeConverter.convert(timerTime) + " " + timerTime);
 							}
 						}
 
@@ -112,15 +113,18 @@ public class RunNewTab extends Thread {
 		stopButton.setEnabled(false);
 		stopButton.addActionListener(new ActionListener() {
 
+			@SuppressWarnings("deprecation")
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				RunWindow.tabIsStarted.put(panel1.getName(), false);
 				startButton.setEnabled(true);
 				stopButton.setEnabled(false);
+				addItemButton.setEnabled(true);
 				comboBox.setEnabled(true);
 				timer.stop();
 				stopTime = System.currentTimeMillis();
 
-				AddCommentWindow addCommentWindow = new AddCommentWindow(tabName, selectedItem, timerTime);
+				new AddCommentWindow(tabName, selectedItem, timerTime);
 
 				timerTime = 0;
 
@@ -145,13 +149,15 @@ public class RunNewTab extends Thread {
 		String[] items = WorkWithDB.getListActivity("ivan");
 		comboBox = new JComboBox<String>(items);
 		comboBox.setBounds(20, 20, 170, 30);
+		comboBox.setName("comboBox");
 		panel1.add(comboBox);
 
-		JButton addItem = new JButton("+ Добавить");
-		addItem.setBounds(200, 20, 120, 30);
-		panel1.add(addItem);
+		addItemButton = new JButton("+ Добавить");
+		addItemButton.setBounds(200, 20, 120, 30);
+		addItemButton.setName("addActivityButton");
+		panel1.add(addItemButton);
 		AddItemEngine addItemEngine = new AddItemEngine(panel1, comboBox);
-		addItem.addActionListener(addItemEngine);
+		addItemButton.addActionListener(addItemEngine);
 
 		JButton historyReportButton = new JButton("История отчетов");
 		historyReportButton.setBounds(330, 1, 140, 30);
@@ -165,24 +171,23 @@ public class RunNewTab extends Thread {
 		reportButton.setBounds(320, 140, 150, 30);
 		panel1.add(reportButton);
 		StatsButton statsButton = new StatsButton(tabName);
-		reportButton.setFocusable(false);
 		reportButton.addActionListener(statsButton);
+
+		panel1.setName(tabName);
+		customListener = new Password(tabName, panel1);
+		TrackingWindow.tabbedPane.addChangeListener(customListener);
 
 		JButton exitButton = new JButton("Закрыть вкладку");
 		exitButton.setBounds(10, 140, 150, 30);
 		panel1.add(exitButton);
-		ExitButtonEngine exitButtonEngine = new ExitButtonEngine(panel1);
+		ExitButtonEngine exitButtonEngine = new ExitButtonEngine(panel1, customListener);
 		exitButton.addActionListener(exitButtonEngine);
 
-		panel1.setName(tabName);
-		customListener = new Password(name1.getText(), panel1);
-		TrackingWindow.tabbedPane.addMouseListener(customListener);
 
-		TrackingWindow.tabbedPane.addTab(TrackingWindow.name1.getText(), panel1);
+		TrackingWindow.tabbedPane.addTab(tabName, panel1);
 		TrackingWindow.tabbedPane.removeTabAt(TrackingWindow.tabbedPane.getTabCount() - 2);
 		RunWindow.trackingWindow.addWelcomeTab();
 
 	}
-
 
 }

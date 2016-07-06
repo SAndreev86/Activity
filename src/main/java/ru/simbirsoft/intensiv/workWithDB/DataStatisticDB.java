@@ -1,14 +1,9 @@
 package ru.simbirsoft.intensiv.workWithDB;
 
-import javax.persistence.*;
+
 import java.util.Date;
 
-@Entity
-@NamedQueries({
-        @NamedQuery(name = "findStatisticByNameAndDate", query = "SELECT c FROM DataStatisticDB c WHERE c.name = :name AND c.date = :date"),
-        @NamedQuery(name = "findMaxIdStatistic", query = "SELECT MAX(id) FROM DataStatisticDB")
-})
-@Table(name = "statistic")
+
 public class DataStatisticDB {
 
     public DataStatisticDB(){
@@ -23,7 +18,7 @@ public class DataStatisticDB {
         this.date = date;
     }
 
-    @Id
+
     private int id;
 
     private String activity;

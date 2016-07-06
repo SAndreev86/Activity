@@ -5,12 +5,10 @@ import ru.simbirsoft.intensiv.workWithDB.WorkWithDB;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import javax.swing.*;
-
 
 @SuppressWarnings("serial")
 public class TrackingWindow extends JFrame {
@@ -76,60 +74,57 @@ public class TrackingWindow extends JFrame {
 		setSize(500, 250);
 		setLocationRelativeTo(null);
 		getContentPane().setLayout(null);
-		
+
 		addWindowListener(new WindowListener() {
-			
+
 			@Override
 			public void windowOpened(WindowEvent e) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 			@Override
 			public void windowIconified(WindowEvent e) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 			@Override
 			public void windowDeiconified(WindowEvent e) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 			@Override
 			public void windowDeactivated(WindowEvent e) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 			@Override
 			public void windowClosing(WindowEvent event) {
-                Object[] options = { "Нет", "Да" };
-                int n = JOptionPane
-                        .showOptionDialog(event.getWindow(), "Закрыть приложение?",
-                                "Подтверждение", JOptionPane.YES_NO_OPTION,
-                                JOptionPane.QUESTION_MESSAGE, null, options,
-                                options[1]);
-                if (n == 1) {
-                    event.getWindow().setVisible(false);
-                    System.exit(0);
-                }
-            }
-			
+				Object[] options = { "Нет", "Да" };
+				int n = JOptionPane.showOptionDialog(event.getWindow(), "Закрыть приложение?", "Подтверждение",
+						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+				if (n == 1) {
+					event.getWindow().setVisible(false);
+					System.exit(0);
+				}
+			}
+
 			@Override
 			public void windowClosed(WindowEvent e) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 			@Override
 			public void windowActivated(WindowEvent e) {
 				// TODO Auto-generated method stub
-				
+
 			}
 		});
-			
+
 	}
 
 	public void addWelcomeTab() {
@@ -141,6 +136,34 @@ public class TrackingWindow extends JFrame {
 		name.setBounds(150, 40, 50, 20);
 
 		jPanel.add(name);
+
+		JLabel test = new JLabel("Логин не существует или пароль неверен!");
+		test.setVisible(false);
+		test.setLayout(null);
+		test.setBounds(130, 20, 300, 20);
+
+		jPanel.add(test);
+
+		JLabel test1 = new JLabel("Минимальное количество символов в имени = 3, максимальное = 20");
+		test1.setVisible(false);
+		test1.setLayout(null);
+		test1.setBounds(30, 20, 350, 20);
+
+		jPanel.add(test1);
+
+		JLabel test2 = new JLabel("Максимальное количество пользователей = 4");
+		test2.setVisible(false);
+		test2.setLayout(null);
+		test2.setBounds(110, 20, 300, 20);
+
+		jPanel.add(test2);
+
+		JLabel test3 = new JLabel("Пользователь с таким именем уже создан");
+		test3.setVisible(false);
+		test3.setLayout(null);
+		test3.setBounds(30, 20, 300, 20);
+
+		jPanel.add(test3);
 
 		name1 = new JTextField();
 		name1.setLayout(null);
@@ -160,178 +183,76 @@ public class TrackingWindow extends JFrame {
 
 		jPanel.add(password1);
 
-		JButton add = new JButton("Добавить пользователя");
+		JButton add = new JButton("Вход");
 		add.setLayout(null);
-		add.setBounds(140, 110, 200, 30);
+		add.setBounds(140, 110, 110, 30);
+
+		jPanel.add(add);
+
+		JButton checkIn = new JButton("Регистрация");
+		checkIn.setLayout(null);
+		checkIn.setBounds(290, 110, 150, 30);
+
+		jPanel.add(checkIn);
+
+        checkIn.addActionListener(new CheckIn());
 
 		add.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (tabbedPane.getTabCount() < 5) {
-					if(WorkWithDB.isExistUser(name1.getText())){
-						if(WorkWithDB.getPassword(name1.getText()).getPassword().
-								equals(password1.getText())){
-							// добро пожаловать снова
-							class Welcome extends JFrame{
-								public Welcome(){
-
-									setVisible(true);
-									setResizable(false);
-									setTitle("Do no find");
-									setSize(350, 150);
-									setLocationRelativeTo(null);
-
-									JPanel jPanel = new JPanel();
-									jPanel.setLayout(null);
-
-									JLabel name = new JLabel("Добро пожаловать снова!");
-									name.setLayout(null);
-									name.setBounds(100, 20, 200, 20);
-
-									jPanel.add(name);
-
-									JButton button = new JButton("Ok");
-									button.setLayout(null);
-									button.setBounds(120, 60, 100, 30);
-
-									button.addActionListener(new ActionListener() {
-										@Override
-										public void actionPerformed(ActionEvent e) {
-											setVisible(false);
-										}
-									});
-									jPanel.add(button);
-
-									add(jPanel);
-
-								}
-							}
-							new Welcome();
-							addPanel();
-						}else{
-							//вы ввели не верный пароль
-							class DoNotFind extends JFrame{
-								public DoNotFind(){
-
-									setVisible(true);
-									setResizable(false);
-									setTitle("Do no find");
-									setSize(350, 150);
-									setLocationRelativeTo(null);
-
-									JPanel jPanel = new JPanel();
-									jPanel.setLayout(null);
-
-									JLabel name = new JLabel("К сожалению пароль не верен.");
-									name.setLayout(null);
-									name.setBounds(90, 20, 200, 20);
-
-									jPanel.add(name);
-
-									JButton button = new JButton("Ok");
-									button.setLayout(null);
-									button.setBounds(120, 70, 100, 30);
-									/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//									KeyEventDispatcher keyEventDispatcher = new KeyEventDispatcher() {
-//							            @Override
-//							            public boolean dispatchKeyEvent(final KeyEvent e) {
-//							                if (e.getID() == KeyEvent.KEY_RELEASED && e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-//							    				dispose();
-//							                }
-//							                if (e.getID() == KeyEvent.KEY_RELEASED && e.getKeyCode() == KeyEvent.VK_ENTER) {
-//							                	button.doClick();
-//							                	
-//							                }
-//							                return false;
-//							            }
-//							        };
-//							        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(keyEventDispatcher);
-//							        
-//							        addWindowListener(new WindowListener() {
-//
-//										@Override
-//										public void windowActivated(WindowEvent arg0) { }
-//
-//										@Override
-//										public void windowClosed(WindowEvent arg0) {
-//									        KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(keyEventDispatcher);	
-//										}
-//
-//										@Override
-//										public void windowClosing(WindowEvent arg0) {
-//									        KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(keyEventDispatcher);	
-//										}
-//
-//										@Override
-//										public void windowDeactivated(WindowEvent arg0) { }
-//
-//										@Override
-//										public void windowDeiconified(WindowEvent arg0) { }
-//
-//										@Override
-//										public void windowIconified(WindowEvent arg0) { }
-//
-//										@Override
-//										public void windowOpened(WindowEvent arg0) { }
-//							        	
-//							        });
-							        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-									button.addActionListener(new ActionListener() {
-										@Override
-										public void actionPerformed(ActionEvent e) {
-//									        KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(keyEventDispatcher);	
-											setVisible(false);
-										}
-									});
-									jPanel.add(button);
-
-									add(jPanel);
-
-								}
-							}
-							new DoNotFind();
-						}
-					}else {
-						WorkWithDB.writeNewUser
-								(name1.getText(), password1.getText());
-						addPanel();
-					}
-				} else {
-					class NewWindow extends JFrame {
-						NewWindow() {
-							setVisible(true);
-							setTitle("Ограничение количества пользователей");
-							setSize(350, 150);
-							setLocationRelativeTo(null);
-
-							JPanel jPanel = new JPanel();
-							jPanel.setLayout(null);
-
-							JLabel name = new JLabel("Максимальное количество пользователей = 4");
-							name.setLayout(null);
-							name.setBounds(20, 40, 300, 20);
-
-							jPanel.add(name);
-
-							add(jPanel);
-						}
-					}
-					new NewWindow();
-				}
-			}
-		});
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (tabbedPane.getTabCount() < 5) {
+                    Component[] compo1 = tabbedPane.getComponents();
+                    boolean is = false;
+                    for (Component i : compo1) {
+                        if (i.getName() == null) {
+                        } else {
+                            if (i.getName().equals(name1.getText()))
+                                is = true;
+                        }
+                    }
+                    if (is) {
+                        // тот же пользователь
+                        test.setVisible(false);
+						test2.setVisible(false);
+                        test3.setVisible(true);
+						System.out.println(111);
+					} else {
+                            if (WorkWithDB.getPassword(name1.getText()).equals(password1.getText())) {
+								System.out.println(12);
+								Password.doYouNeedCheckPassword = false;
+								RunWindow.tabIsStarted.put(name1.getText(), false);
+								addPanel(name1.getText());
+                            } else {
+                                //вы ввели не верный пароль или логин
+								System.out.println(13);
+								System.out.println(WorkWithDB.getPassword(name1.getText()));
+								System.out.println(password1.getText());
+								test2.setVisible(false);
+                                test3.setVisible(false);
+                                test.setVisible(true);
+                            }
+                    }
+                } else {
+                    //много пользователей
+					System.out.println(14);
+					test.setVisible(false);
+                    test3.setVisible(false);
+                    test2.setVisible(true);
+                }
+            }
+        });
 
 		tabbedPane.setBounds(1, 1, 500, 230);
 		getContentPane().add(tabbedPane);
 		tabbedPane.addTab("+", jPanel);
 
-		jPanel.add(add);
+		jPanel.add(checkIn);
 
 	}
 
-	public static void addPanel() {
+	public static void addPanel(String temp) {
 
-		RunNewTab runNewTab = new RunNewTab(TrackingWindow.name1.getText());
+		RunNewTab runNewTab = new RunNewTab(temp);
 		runNewTab.start();
 
 	}

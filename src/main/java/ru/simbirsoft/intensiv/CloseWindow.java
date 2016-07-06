@@ -59,55 +59,56 @@ public class CloseWindow extends JFrame {
 		getContentPane().add(warning);
 		getContentPane().add(yesButton);
 		getContentPane().add(noButton);
-		
-		
-		yesButton.setFocusable(false);
-		noButton.setFocusable(false);
-		
-		//реализация клавиш для краткой статистики///////////////////////////////////////////////////////////////////////////////////////////////////
-				KeyEventDispatcher keyEvent = new KeyEventDispatcher() {
-		            @Override
-		            public boolean dispatchKeyEvent(final KeyEvent e) {
-		                if (e.getID() == KeyEvent.KEY_RELEASED && e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-		                	noButton.doClick();
-		                }
-		                if (e.getID() == KeyEvent.KEY_RELEASED && e.getKeyCode() == KeyEvent.VK_ENTER) {
-		                	yesButton.doClick();
-		                }
-		                return false;
-		            }
-		        };
-		        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(keyEvent);
-		        
-		        addWindowListener(new WindowListener() {
 
-					@Override
-					public void windowActivated(WindowEvent arg0) { }
+		// реализация клавиш///////////////
+		KeyEventDispatcher keyEvent = new KeyEventDispatcher() {
+			@Override
+			public boolean dispatchKeyEvent(final KeyEvent e) {
+				if (e.getID() == KeyEvent.KEY_RELEASED && e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+					noButton.doClick();
+				}
+				if (e.getID() == KeyEvent.KEY_RELEASED && e.getKeyCode() == KeyEvent.VK_ENTER) {
+					yesButton.doClick();
+				}
+				return false;
+			}
+		};
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(keyEvent);
 
-					@Override
-					public void windowClosed(WindowEvent arg0) {
-				        KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(keyEvent);				
-					}
+		addWindowListener(new WindowListener() {
 
-					@Override
-					public void windowClosing(WindowEvent arg0) {
-				        KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(keyEvent);
-					}
+			@Override
+			public void windowActivated(WindowEvent arg0) {
+			}
 
-					@Override
-					public void windowDeactivated(WindowEvent arg0) { }
+			@Override
+			public void windowClosed(WindowEvent arg0) {
+				KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(keyEvent);
+			}
 
-					@Override
-					public void windowDeiconified(WindowEvent arg0) { }
+			@Override
+			public void windowClosing(WindowEvent arg0) {
+				KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(keyEvent);
+			}
 
-					@Override
-					public void windowIconified(WindowEvent arg0) { }
+			@Override
+			public void windowDeactivated(WindowEvent arg0) {
+			}
 
-					@Override
-					public void windowOpened(WindowEvent arg0) { }
-		        	
-		        });
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			@Override
+			public void windowDeiconified(WindowEvent arg0) {
+			}
+
+			@Override
+			public void windowIconified(WindowEvent arg0) {
+			}
+
+			@Override
+			public void windowOpened(WindowEvent arg0) {
+			}
+
+		});
+		////////////////
 
 	}
 
