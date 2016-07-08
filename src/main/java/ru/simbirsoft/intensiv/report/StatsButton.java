@@ -1,9 +1,6 @@
 package ru.simbirsoft.intensiv.report;
 
-import java.awt.Font;
-import java.awt.KeyEventDispatcher;
-import java.awt.KeyboardFocusManager;
-import java.awt.Robot;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -12,42 +9,38 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.ScrollPaneConstants;
+import javax.swing.*;
+
 import ru.simbirsoft.intensiv.TimeConverter;
+import ru.simbirsoft.intensiv.TrackingWindow;
 import ru.simbirsoft.intensiv.workWithDB.DataStatisticDB;
 import ru.simbirsoft.intensiv.workWithDB.WorkWithDB;
+
+import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
 public class StatsButton implements ActionListener {
 
 	String name;
+	TrackingWindow trackingWindow;
 
-	public StatsButton(String name) {
+	public StatsButton(String name, TrackingWindow trackingWindow) {
 		this.name = name;
-		System.out.println(name);
+		this.trackingWindow = trackingWindow;
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		JFrame frameL = new JFrame("Краткий отчет");
+		JDialog dialog = new JDialog(trackingWindow, Dialog.ModalityType.APPLICATION_MODAL);
+		dialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		dialog.setTitle("Краткий отчет");
+
 		JPanel jPanelL = new JPanel();
 		jPanelL.setLayout(null);
-
-		frameL.add(jPanelL);
 
 		JButton detailedStatL = new JButton("подробнее..");
 		detailedStatL.setLayout(null);
@@ -70,21 +63,37 @@ public class StatsButton implements ActionListener {
 
 		List<DataStatisticDB> acty = WorkWithDB.getStatistic(name, new Date());
 
+		// HashMap<String, DataStatisticDB> actySet = new HashMap<>();
+		//
+		// for(DataStatisticDB i : acty){
+		// actySet.put(i.getActivity(), i);
+		// }
+		//
+		// for(Entry<String, DataStatisticDB> i : actySet.entrySet()){
+		// for(DataStatisticDB j: acty){
+		// if(i.getValue().getActivity().equals(j.getActivity()) &&
+		// !i.getValue().equals(j)){
+		// i.getValue().setTime(i.getValue().getTime() + j.getTime());
+		// }
+		// }
+		// }
+
 		LinkedHashMap<String, DataStatisticDB> actySet = new LinkedHashMap<String, DataStatisticDB>();
 
 		for (DataStatisticDB s : acty) {
-			if (actySet.containsKey(s.getName())) {
+			if (actySet.containsKey(s.getActivity())) {
 
-				DataStatisticDB tempDB = actySet.get(s.getName());
+				DataStatisticDB tempDB = actySet.get(s.getActivity());
 				tempDB.setTime(tempDB.getTime() + s.getTime());
-				actySet.put(s.getName(), tempDB);
+				actySet.put(s.getActivity(), tempDB);
 
 			} else {
 
-				actySet.put(s.getName(), s);
+				actySet.put(s.getActivity(), s);
 
 			}
 		}
+
 		incomingL.append("Краткий отчет за: " + new SimpleDateFormat("dd.MM.yyyy").format(new Date()) + "\n");
 		incomingL.append(" \n");
 
@@ -98,16 +107,18 @@ public class StatsButton implements ActionListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
-				JFrame frameD = new JFrame("Развернутый отчет");
+				JDialog dialog1 = new JDialog(trackingWindow, Dialog.ModalityType.APPLICATION_MODAL);
+				dialog1.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+				dialog1.setTitle("Развернутый отчет");
+
 				JPanel jPanelD = new JPanel();
 				jPanelD.setLayout(null);
 
-				frameD.add(jPanelD);
-
-				JTextArea incomingD = new JTextArea(20, 30);
-				incomingD.setFont(new Font("Arial", Font.CENTER_BASELINE, 20));
-				incomingD.setLineWrap(true);
-				incomingD.setWrapStyleWord(true);
+				JEditorPane incomingD = new JTextPane();
+				incomingD.setContentType("text/html");
+				incomingD.setFont(new Font("Arial", Font.CENTER_BASELINE, 10));
+				// incomingD.setLineWrap(true);
+				// incomingD.setWrapStyleWord(true);
 				incomingD.setEditable(false);
 
 				JScrollPane qScrollerD = new JScrollPane(incomingD);
@@ -118,21 +129,24 @@ public class StatsButton implements ActionListener {
 
 				jPanelD.add(qScrollerD);
 
-				incomingD.append("Подробный отчет за: " + new SimpleDateFormat("dd.MM.yyyy").format(new Date()) + "\n");
-				incomingD.append(" \n");
-
 				List<DataStatisticDB> acty = WorkWithDB.getStatistic(name, new Date());
+
+				String TempincomingD = "<h1><font face=\"Arial\">Подробный отчет за: "
+						+ new SimpleDateFormat("dd.MM.yyyy").format(new Date()) + "</font></h1>";
 
 				for (DataStatisticDB actD : acty) {
 
-					incomingD.append("Время, затраченное на " + actD.getActivity() + ", составляет: "
-							+ TimeConverter.convert(actD.getTime()) + "\n");
+					TempincomingD += "<h2><font face=\"Arial\">Время, затраченное на " + actD.getActivity() + ", составляет: "
+							+ TimeConverter.convert(actD.getTime()) + "</font></h2>";
 
 					if (!"".equals(actD.getComment())) {
-						incomingD.append("Комментарий: " + actD.getComment() + "\n");
-						incomingD.append(" \n");
+
+						TempincomingD += "<p><font face=\"Arial\">Комментарий: " + actD.getComment() + "</font></p><br>";
 					}
+
 				}
+
+				incomingD.setText(TempincomingD);
 
 				// реализация клавиши для подробной
 				// статистики///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,14 +154,14 @@ public class StatsButton implements ActionListener {
 					@Override
 					public boolean dispatchKeyEvent(final KeyEvent e) {
 						if (e.getID() == KeyEvent.KEY_RELEASED && e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-							frameD.dispose();
+							dialog1.dispose();
 						}
 						return false;
 					}
 				};
 				KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(keyEventDispatcher);
 
-				frameD.addWindowListener(new WindowListener() {
+				dialog1.addWindowListener(new WindowListener() {
 
 					@Override
 					public void windowActivated(WindowEvent arg0) {
@@ -184,13 +198,14 @@ public class StatsButton implements ActionListener {
 				});
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-				frameD.setVisible(true);
-				frameD.setSize(800, 500);
-				frameD.setLocationRelativeTo(null);
-				frameD.setResizable(false);
+				dialog.dispose();
+				dialog1.setBounds(0, 0, 800, 500);
+				dialog1.setResizable(false);
+				dialog1.getContentPane().add(jPanelD);
+				dialog1.setLocationRelativeTo(null);
+				dialog1.setVisible(true);
 
 				// закрываем фрейм краткой статистики
-				frameL.dispose();
 
 			}
 		});
@@ -201,7 +216,7 @@ public class StatsButton implements ActionListener {
 			@Override
 			public boolean dispatchKeyEvent(final KeyEvent e) {
 				if (e.getID() == KeyEvent.KEY_RELEASED && e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-					frameL.dispose();
+					dialog.dispose();
 				}
 				if (e.getID() == KeyEvent.KEY_RELEASED && e.getKeyCode() == KeyEvent.VK_ENTER) {
 					detailedStatL.doClick();
@@ -211,7 +226,7 @@ public class StatsButton implements ActionListener {
 		};
 		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(keyEvent);
 
-		frameL.addWindowListener(new WindowListener() {
+		dialog.addWindowListener(new WindowListener() {
 
 			@Override
 			public void windowActivated(WindowEvent arg0) {
@@ -246,10 +261,11 @@ public class StatsButton implements ActionListener {
 		});
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		frameL.setVisible(true);
-		frameL.setSize(667, 567);
-		frameL.setLocationRelativeTo(null);
-		frameL.setResizable(false);
+		dialog.setBounds(0, 0, 667, 567);
+		dialog.setResizable(false);
+		dialog.getContentPane().add(jPanelL);
+		dialog.setLocationRelativeTo(null);
+		dialog.setVisible(true);
 
 	}
 

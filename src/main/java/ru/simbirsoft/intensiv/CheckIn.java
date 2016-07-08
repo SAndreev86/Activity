@@ -9,17 +9,24 @@ import java.awt.event.ActionListener;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
+
 
 public class CheckIn  implements ActionListener{
+
+    TrackingWindow trackingWindow;
+
+    public CheckIn(TrackingWindow trackingWindow) {
+        this.trackingWindow = trackingWindow;
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
-        class Temp extends JFrame{
-            public Temp(){
-                setVisible(true);
-                setResizable(false);
-                setTitle("Регистрация");
-                setSize(350, 250);
-                setLocationRelativeTo(null);
+
+                JDialog dialog = new JDialog(trackingWindow, Dialog.ModalityType.APPLICATION_MODAL);
+                dialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+                dialog.setTitle("Регистрация");
+
 
                 JPanel jPanel = new JPanel();
                 jPanel.setLayout(null);
@@ -81,6 +88,7 @@ public class CheckIn  implements ActionListener{
                 jPanel.add(mistake1);
 
                 JLabel test2 = new JLabel("Максимальное количество пользователей = 4");
+                test2.setFont((new Font("Arial", Font.CENTER_BASELINE, 10)));
                 test2.setVisible(false);
                 test2.setLayout(null);
                 test2.setBounds(60, 20, 300, 20);
@@ -96,7 +104,7 @@ public class CheckIn  implements ActionListener{
                 cancel.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        setVisible(false);
+                        dialog.dispose();
                     }
                 });
 
@@ -122,7 +130,7 @@ public class CheckIn  implements ActionListener{
                                 password1.setText(null);
                             } else {
                                 //проверки на длину и тд
-                                Pattern p = Pattern.compile("^[А-Яа-яA-Za-z0-9]{1}[А-Яа-яA-Za-z0-9 ]{0,18}[А-Яа-яA-Za-z0-9]{0,1}$");
+                                Pattern p = Pattern.compile("^[А-Яа-яA-Za-z0-9ёЁ]{1}[А-Яа-яA-Za-z0-9Ёё ]{0,18}[ёЁА-Яа-яA-Za-z0-9]{0,1}$");
                                 Matcher m = p.matcher(tempName);
 
                                 Pattern p1 = Pattern.compile("^[A-Za-z0-9]{0,16}$");
@@ -135,7 +143,7 @@ public class CheckIn  implements ActionListener{
                                     WorkWithDB.writeNewUser(tempName, tempPassword);
                                     TrackingWindow.addPanel(tempName);
 
-                                    setVisible(false);
+                                    dialog.dispose();
                                 } else {
                                     //вывести сообщенине о неверном вводе остальные скрыть
                                     mistake1.setVisible(false);
@@ -153,9 +161,13 @@ public class CheckIn  implements ActionListener{
                         }
                     }
                 });
-                getContentPane().add(jPanel);
-            }
-        }
-        new Temp();
+
+        dialog.setBounds(0, 0, 350, 250);
+        dialog.setResizable(false);
+        dialog.getContentPane().add(jPanel);
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+
+
     }
 }

@@ -20,6 +20,8 @@ public class CloseWindow extends JFrame {
 
 	public CloseWindow(JPanel a) {
 		this.a = a;
+
+
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setTitle("Закрытие вкладки");
 		setSize(300, 150);
@@ -30,8 +32,8 @@ public class CloseWindow extends JFrame {
 
 		JLabel areYoySureLabel = new JLabel("Вы уверены?");
 		areYoySureLabel.setBounds(110, 10, 200, 20);
-		JLabel warning = new JLabel("Все ваши данные будут удалены!");
-		warning.setBounds(40, 30, 250, 20);
+		JLabel warning = new JLabel("Все запущенные активности не сохранятся!");
+		warning.setBounds(20, 30, 300, 20);
 
 		yesButton = new JButton("Да");
 		yesButton.setBounds(20, 60, 100, 50);
@@ -40,8 +42,13 @@ public class CloseWindow extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+//				System.out.println("Delete and Add");
 				TrackingWindow.tabbedPane.remove(a);
 				ExitButtonEngine.closeWindow.setVisible(false);
+				
+//				TrackingWindow.tabbedPane.removeTabAt(TrackingWindow.tabbedPane.getTabCount() - 1);
+//				RunWindow.trackingWindow.addWelcomeTab();
+				
 			}
 		});
 

@@ -1,8 +1,6 @@
 package ru.simbirsoft.intensiv.report;
 
-import java.awt.Font;
-import java.awt.KeyEventDispatcher;
-import java.awt.KeyboardFocusManager;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -12,34 +10,34 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.ScrollPaneConstants;
+import javax.swing.*;
+
 import ru.simbirsoft.intensiv.TimeConverter;
+import ru.simbirsoft.intensiv.TrackingWindow;
 import ru.simbirsoft.intensiv.workWithDB.DataStatisticDB;
 import ru.simbirsoft.intensiv.workWithDB.WorkWithDB;
+
+import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
 public class ReportHistoryButton implements ActionListener {
 
 	String name;
+	TrackingWindow trackingWindow;
 
 	public ReportHistoryButton(String name) {
 		this.name = name;
-		System.out.println(name);
 	}
 
 	private JComboBox<String> comboBox;
 
 	public void actionPerformed(ActionEvent e) {
 
-		JFrame frameD = new JFrame("История отчетов");
+		JDialog dialog = new JDialog(trackingWindow, Dialog.ModalityType.APPLICATION_MODAL);
+		dialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		dialog.setTitle("История отчетов");
+
 		JPanel jPanelD = new JPanel();
 		jPanelD.setLayout(null);
-
-		frameD.add(jPanelD);
 
 		String ThreeDays[] = new String[3];
 
@@ -65,10 +63,11 @@ public class ReportHistoryButton implements ActionListener {
 		comboBox.setBounds(0, 0, 170, 20);
 		jPanelD.add(comboBox);
 
-		JTextArea incomingD = new JTextArea(20, 30);
-		incomingD.setFont(new Font("Arial", Font.CENTER_BASELINE, 20));
-		incomingD.setLineWrap(true);
-		incomingD.setWrapStyleWord(true);
+		JEditorPane incomingD = new JTextPane();
+		incomingD.setContentType("text/html");
+		incomingD.setFont(new Font("Arial", Font.CENTER_BASELINE, 10));
+		// incomingD.setLineWrap(true);
+		// incomingD.setWrapStyleWord(true);
 		incomingD.setEditable(false);
 
 		JScrollPane qScrollerD = new JScrollPane(incomingD);
@@ -85,16 +84,33 @@ public class ReportHistoryButton implements ActionListener {
 
 		List<DataStatisticDB> stat = WorkWithDB.getStatistic(name, strT);
 
+		// for (DataStatisticDB actD : stat) {
+		//
+		// incomingD.append("Активность: " + actD.getActivity() + "; затраченное
+		// время (чч:мм:сс): "
+		// + TimeConverter.convert(actD.getTime()) + "\n");
+		//
+		// if (!"".equals(actD.getComment())) {
+		// incomingD.append("Комментарий: " + actD.getComment() + "\n");
+		// incomingD.append(" \n");
+		// }
+		// }
+
+		String TempincomingD = "<h1><font face=\"Arial\">Oтчет за: " + new SimpleDateFormat("dd.MM.yyyy").format(strT) + "</font></h1>";
+
 		for (DataStatisticDB actD : stat) {
 
-			incomingD.setText("Активность: " + actD.getActivity() + "; затраченное время (чч:мм:сс): "
-					+ TimeConverter.convert(actD.getTime()) + "\n");
+			TempincomingD += "<h2><font face=\"Arial\">Время, затраченное на " + actD.getActivity() + ", составляет: "
+					+ TimeConverter.convert(actD.getTime()) + "</font></h2>";
 
 			if (!"".equals(actD.getComment())) {
-				incomingD.append("Комментарий: " + actD.getComment() + "\n");
-				incomingD.append(" \n");
+
+				TempincomingD += "<p><font face=\"Arial\">Комментарий: " + actD.getComment() + "</font></p><br>";
 			}
+
 		}
+
+		incomingD.setText(TempincomingD);
 
 		comboBox.addActionListener(new ActionListener() {
 
@@ -118,16 +134,22 @@ public class ReportHistoryButton implements ActionListener {
 
 						List<DataStatisticDB> stat = WorkWithDB.getStatistic(name, strT);
 
+						String TempincomingD = "<h1><font face=\"Arial\">Oтчет за: " + new SimpleDateFormat("dd.MM.yyyy").format(strT)
+								+ "</font></h1>";
+
 						for (DataStatisticDB actD : stat) {
 
-							incomingD.setText("Активность: " + actD.getActivity() + "; затраченное время (чч:мм:сс): "
-									+ TimeConverter.convert(actD.getTime()) + "\n");
+							TempincomingD += "<h2><font face=\"Arial\">Время, затраченное на " + actD.getActivity() + ", составляет: "
+									+ TimeConverter.convert(actD.getTime()) + "</font></h2>";
 
 							if (!"".equals(actD.getComment())) {
-								incomingD.append("Комментарий: " + actD.getComment() + "\n");
-								incomingD.append(" \n");
+
+								TempincomingD += "<p><font face=\"Arial\">Комментарий: " + actD.getComment() + "</font></p><br>";
 							}
+
 						}
+
+						incomingD.setText(TempincomingD);
 					}
 				}
 			}
@@ -138,14 +160,14 @@ public class ReportHistoryButton implements ActionListener {
 			@Override
 			public boolean dispatchKeyEvent(final KeyEvent e) {
 				if (e.getID() == KeyEvent.KEY_RELEASED && e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-					frameD.dispose();
+					dialog.dispose();
 				}
 				return false;
 			}
 		};
 		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(keyEventDispatcher);
 
-		frameD.addWindowListener(new WindowListener() {
+		dialog.addWindowListener(new WindowListener() {
 
 			@Override
 			public void windowActivated(WindowEvent arg0) {
@@ -180,10 +202,11 @@ public class ReportHistoryButton implements ActionListener {
 		});
 		////////////////////////////////////////////////////
 
-		frameD.setVisible(true);
-		frameD.setSize(800, 520);
-		frameD.setLocationRelativeTo(null);
-		frameD.setResizable(false);
+		dialog.setBounds(0, 0, 800, 520);
+		dialog.setResizable(false);
+		dialog.getContentPane().add(jPanelD);
+		dialog.setLocationRelativeTo(null);
+		dialog.setVisible(true);
 
 	}
 }

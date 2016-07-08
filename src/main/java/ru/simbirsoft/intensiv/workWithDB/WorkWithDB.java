@@ -3,25 +3,27 @@ package ru.simbirsoft.intensiv.workWithDB;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 public class WorkWithDB {
 
-	private static List<String> list = new ArrayList<>();
 
 	private WorkWithDB() {
 	}
 
+	static List<String> list = new ArrayList<>();
+
 	static{
-		list.add("чай");
 		list.add("завтрак");
 		list.add("обед");
 		list.add("ужин");
 		list.add("соц.сеть");
-		list.add("пробежка");
 		list.add("работа");
+		list.add("пробежка");
 		list.add("отдых");
+		list.add("чай");
 		list.add("курение");
 	}
 
@@ -83,9 +85,6 @@ public class WorkWithDB {
 					"VALUES (1, 'Paul', '12');";
 			stmt.executeUpdate(sql1);
 			ConnectDB.getCon().getC().commit();
-			System.out.println(4);
-
-
 
 			String sql2 = "CREATE TABLE ACTIVITY " +
 					"(ID INT PRIMARY KEY     NOT NULL," +
@@ -93,13 +92,10 @@ public class WorkWithDB {
 					" NAME        TEXT     NOT NULL) ";
 			stmt.executeUpdate(sql2);
 
-			String sql3 = "INSERT INTO ACTIVITY (ID, ACTIVITY, NAME) " +
-					"VALUES (1, 'SON', 'Paul');";
+			 String sql3 = "INSERT INTO ACTIVITY (ID, ACTIVITY, NAME) " +
+					"VALUES (9, 'курение', 'ivan');";
 			stmt.executeUpdate(sql3);
 			ConnectDB.getCon().getC().commit();
-			System.out.println(5);
-
-
 
 			String sql4 = "CREATE TABLE STATISTICS " +
 					"(ID INT PRIMARY KEY     NOT NULL," +
@@ -214,7 +210,9 @@ public class WorkWithDB {
      * у всех плюс те которые он создал сам
      */
 	public static String[] getListActivity(String name) {
+		System.out.println(name);
 		List<String> list1 = new ArrayList<>();
+		list1.addAll(list);
 		try {
 			try {
 				PreparedStatement statement = ConnectDB.getCon().getC().prepareStatement(
@@ -222,7 +220,7 @@ public class WorkWithDB {
 				statement.setString(1, name);
 				ResultSet rs = statement.executeQuery();
 				while(rs.next()){
-					list.add(rs.getString("activity"));
+					list1.add(rs.getString("activity"));
 				}
 			} catch (SQLException ex) {
 				ConnectDB.getCon().getC().rollback();
@@ -230,7 +228,7 @@ public class WorkWithDB {
 
 			}
 		}catch (SQLException e){}
-		list1.addAll(list);
+		Collections.reverse(list1);
 		String [] stockArr = list1.toArray(new String[0]);
 		return stockArr;
 	}
@@ -371,6 +369,28 @@ public class WorkWithDB {
 		if(sd1.equals("sdifviduvbfduvbalsdjhbv")){
 			isExist = false;
 		}
+		return isExist;
+	}
+
+	public static boolean isExistActivity(String activity, String name) {
+		System.out.println(name);
+		System.out.println(activity);
+		boolean isExist = true;
+		String sd1 = "sdifviduvbfduvbalsdjhbv{}[]";
+		try {
+			PreparedStatement statement1 = ConnectDB.getCon().getC().prepareStatement(
+					"SELECT * FROM ACTIVITY WHERE  name = ?");
+			statement1.setString(1, name);
+			ResultSet rs = statement1.executeQuery();
+			while(rs.next()){
+				if(rs.getString("activity").equals(activity)) {
+					isExist = false;
+				}
+			}
+		} catch (SQLException ex) {}
+//		if(sd1.equals("sdifviduvbfduvbalsdjhbv{}[]")){
+//					isExist = false;
+//		}
 		return isExist;
 	}
 

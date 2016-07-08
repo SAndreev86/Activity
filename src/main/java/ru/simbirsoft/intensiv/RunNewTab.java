@@ -20,10 +20,10 @@ public class RunNewTab extends Thread {
 	long stopTime;
 	long timerTime; // время таймера в секундах
 	String selectedItem;
-	static JTextArea comment;
 	JComboBox<String> comboBox;
 	JButton stopButton;
 	JButton addItemButton;
+	TrackingWindow trackingWindow;
 
 	public static Password customListener;
 
@@ -48,8 +48,9 @@ public class RunNewTab extends Thread {
 
 	};
 
-	public RunNewTab(String tabName) {
+	public RunNewTab(String tabName, TrackingWindow trackingWindow) {
 		this.tabName = tabName;
+		this.trackingWindow = trackingWindow;
 	}
 
 	// метод по созданию new Tab
@@ -57,9 +58,10 @@ public class RunNewTab extends Thread {
 
 		JPanel panel1 = new JPanel();
 		panel1.setLayout(null);
+		panel1.setName(tabName);
 
 		JButton startButton = new JButton("СТАРТ");
-		startButton.setBounds(30, 70, 100, 50);
+		startButton.setBounds(30, 80, 100, 50);
 		startButton.setName("start");
 		panel1.add(startButton);
 		startButton.addActionListener(new ActionListener() {
@@ -107,7 +109,7 @@ public class RunNewTab extends Thread {
 		});
 
 		stopButton = new JButton("СТОП");
-		stopButton.setBounds(340, 70, 100, 50);
+		stopButton.setBounds(340, 80, 100, 50);
 		panel1.add(stopButton);
 		stopButton.setName("stop");
 		stopButton.setEnabled(false);
@@ -124,9 +126,10 @@ public class RunNewTab extends Thread {
 				timer.stop();
 				stopTime = System.currentTimeMillis();
 
-				new AddCommentWindow(tabName, selectedItem, timerTime);
+				new AddCommentWindow(tabName, selectedItem, timerTime).showDialog(trackingWindow);
 
 				timerTime = 0;
+				timerField.setText("00:00:00");
 
 			}
 		});
@@ -136,7 +139,7 @@ public class RunNewTab extends Thread {
 		panel1.add(timerLabel);
 
 		timerField = new JTextField();
-		timerField.setBounds(190, 85, 100, 50);
+		timerField.setBounds(190, 80, 100, 50);
 		timerField.setFont(new Font("Arial", Font.CENTER_BASELINE, 20));
 		timerField.setHorizontalAlignment(JTextField.CENTER);
 		timerField.setEditable(false);
@@ -146,7 +149,7 @@ public class RunNewTab extends Thread {
 		chooseActivityLabel.setBounds(30, 5, 150, 15);
 		panel1.add(chooseActivityLabel);
 
-		String[] items = WorkWithDB.getListActivity("ivan");
+		String[] items = WorkWithDB.getListActivity(tabName);
 		comboBox = new JComboBox<String>(items);
 		comboBox.setBounds(20, 20, 170, 30);
 		comboBox.setName("comboBox");
@@ -156,8 +159,13 @@ public class RunNewTab extends Thread {
 		addItemButton.setBounds(200, 20, 120, 30);
 		addItemButton.setName("addActivityButton");
 		panel1.add(addItemButton);
-		AddItemEngine addItemEngine = new AddItemEngine(panel1, comboBox);
-		addItemButton.addActionListener(addItemEngine);
+
+		addItemButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new AddActivityWindow(panel1, comboBox).showDialog(trackingWindow);
+			}
+		});
 
 		JButton historyReportButton = new JButton("История отчетов");
 		historyReportButton.setBounds(330, 1, 140, 30);
@@ -170,19 +178,20 @@ public class RunNewTab extends Thread {
 		JButton reportButton = new JButton("Показать отчет");
 		reportButton.setBounds(320, 140, 150, 30);
 		panel1.add(reportButton);
-		StatsButton statsButton = new StatsButton(tabName);
+		StatsButton statsButton = new StatsButton(tabName, trackingWindow);
 		reportButton.addActionListener(statsButton);
+		reportButton.setFocusable(false);
 
-		panel1.setName(tabName);
-		customListener = new Password(tabName, panel1);
+
+		customListener = new Password(tabName, panel1, trackingWindow);
 		TrackingWindow.tabbedPane.addChangeListener(customListener);
 
 		JButton exitButton = new JButton("Закрыть вкладку");
 		exitButton.setBounds(10, 140, 150, 30);
 		panel1.add(exitButton);
-		ExitButtonEngine exitButtonEngine = new ExitButtonEngine(panel1, customListener);
+		ExitButtonEngine exitButtonEngine = new ExitButtonEngine(panel1, customListener, trackingWindow);
 		exitButton.addActionListener(exitButtonEngine);
-
+		exitButton.setFocusable(false);
 
 		TrackingWindow.tabbedPane.addTab(tabName, panel1);
 		TrackingWindow.tabbedPane.removeTabAt(TrackingWindow.tabbedPane.getTabCount() - 2);

@@ -1,5 +1,7 @@
 package ru.simbirsoft.intensiv;
 
+
+import ru.simbirsoft.intensiv.checkingApplication.CheckRunningApplication;
 import ru.simbirsoft.intensiv.workWithDB.WorkWithDB;
 
 import java.awt.*;
@@ -7,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.*;
 
@@ -16,12 +20,16 @@ public class TrackingWindow extends JFrame {
 	static long startTime; // время СТАРТА в миллисекундах
 	static JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	static JTextField name1;
+	private static TrackingWindow trackingWindow = new TrackingWindow();
+
+	public static TrackingWindow getTrackingWindow() {
+		return trackingWindow;
+	}
 
 	TrayIcon trayIcon;
 	SystemTray tray;
 
-	public TrackingWindow() {
-
+	private TrackingWindow() {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
@@ -29,19 +37,74 @@ public class TrackingWindow extends JFrame {
 		if (SystemTray.isSupported()) {
 			tray = SystemTray.getSystemTray();
 
-			Image image = Toolkit.getDefaultToolkit().getImage("home.png");
-			ActionListener exitListener = e -> System.exit(0);
+			Image image = Toolkit.getDefaultToolkit().getImage("./home.png");
+			ActionListener exitListener = new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					class Close extends JFrame{
+						public Close(){
+							setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+							setTitle("Закрытие приложения");
+							setSize(300, 150);
+							setLocationRelativeTo(null);
+							getContentPane().setLayout(null);
+							setVisible(true);
+							setResizable(false);
+
+							JLabel areYoySureLabel = new JLabel("Вы уверены?");
+							areYoySureLabel.setBounds(110, 10, 200, 20);
+							JLabel warning = new JLabel("Все запущенные активности не сохранятся!");
+							warning.setBounds(40, 30, 250, 20);
+
+							JButton yesButton = new JButton("Да");
+							yesButton.setBounds(20, 60, 100, 50);
+
+							yesButton.addActionListener(new ActionListener() {
+
+								@Override
+								public void actionPerformed(ActionEvent e) {
+									System.exit(0);
+								}
+							});
+
+							JButton noButton = new JButton("Нет");
+							noButton.setBounds(180, 60, 100, 50);
+
+							noButton.addActionListener(new ActionListener() {
+								@Override
+								public void actionPerformed(ActionEvent e) {
+									dispose();
+								}
+							});
+
+							getContentPane().add(areYoySureLabel);
+							getContentPane().add(warning);
+							getContentPane().add(yesButton);
+							getContentPane().add(noButton);
+						}
+					}
+					new Close();
+				}
+			};
 			PopupMenu popup = new PopupMenu();
-			MenuItem defaultItem = new MenuItem("Exit");
+			MenuItem defaultItem = new MenuItem("Выход");
 			defaultItem.addActionListener(exitListener);
 			popup.add(defaultItem);
-			defaultItem = new MenuItem("Open");
+			defaultItem = new MenuItem("Развернуть");
 			defaultItem.addActionListener(e -> {
 				setVisible(true);
 				setExtendedState(JFrame.NORMAL);
 			});
 			popup.add(defaultItem);
 			trayIcon = new TrayIcon(image, "Суточный трекинг активности", popup);
+			trayIcon.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					setVisible(true);
+					setExtendedState(JFrame.NORMAL);
+
+				}
+			});
 			trayIcon.setImageAutoSize(true);
 		} else {
 		}
@@ -65,7 +128,7 @@ public class TrackingWindow extends JFrame {
 				setVisible(true);
 			}
 		});
-		setIconImage(Toolkit.getDefaultToolkit().getImage("home.png"));
+		setIconImage(Toolkit.getDefaultToolkit().getImage("./home.png"));
 
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		setVisible(true);
@@ -108,6 +171,7 @@ public class TrackingWindow extends JFrame {
 						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
 				if (n == 1) {
 					event.getWindow().setVisible(false);
+					CheckRunningApplication.deleteFile();
 					System.exit(0);
 				}
 			}
@@ -185,17 +249,17 @@ public class TrackingWindow extends JFrame {
 
 		JButton add = new JButton("Вход");
 		add.setLayout(null);
-		add.setBounds(140, 110, 110, 30);
+		add.setBounds(110, 110, 110, 30);
 
 		jPanel.add(add);
 
 		JButton checkIn = new JButton("Регистрация");
 		checkIn.setLayout(null);
-		checkIn.setBounds(290, 110, 150, 30);
+		checkIn.setBounds(240, 110, 150, 30);
 
 		jPanel.add(checkIn);
 
-        checkIn.addActionListener(new CheckIn());
+        checkIn.addActionListener(new CheckIn(trackingWindow));
 
 		add.addActionListener(new ActionListener() {
             @Override
@@ -244,6 +308,19 @@ public class TrackingWindow extends JFrame {
 
 		tabbedPane.setBounds(1, 1, 500, 230);
 		getContentPane().add(tabbedPane);
+		
+		//проверка по количеству вкладок
+		if (TrackingWindow.tabbedPane.getTabCount() == 4) {
+			test2.setVisible(true);
+			add.setVisible(false);
+			checkIn.setVisible(false);
+			name.setVisible(false);
+			password.setVisible(false);
+			name1.setVisible(false);
+			password1.setVisible(false);
+		}
+//		System.out.println("Количество вкладок "+ TrackingWindow.tabbedPane.getTabCount() );
+		
 		tabbedPane.addTab("+", jPanel);
 
 		jPanel.add(checkIn);
@@ -252,7 +329,7 @@ public class TrackingWindow extends JFrame {
 
 	public static void addPanel(String temp) {
 
-		RunNewTab runNewTab = new RunNewTab(temp);
+		RunNewTab runNewTab = new RunNewTab(temp, trackingWindow);
 		runNewTab.start();
 
 	}
